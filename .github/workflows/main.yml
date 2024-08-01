@@ -1,0 +1,54 @@
+name: CI/CD
+
+on: push
+
+jobs:
+  Dockerfile:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: tsoares91/open_weather:latest
+
+  PEP8:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.9
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install flake8
+      run: pip install flake8
+    - name: Run flake8
+      run: flake8 ./python/main_opp.py
+
+  UnitTests:
+    needs: Dockerfile
+    runs-on: ubuntu-latest
+    container:
+      image: tsoares91/open_weather:latest
+    steps:
+    - uses: actions/checkout@v2   
+    - name: Run Unittest_execution
+      run: python3 ./python/ut_unittest.py
+  
+  RunPython: 
+    needs: UnitTests
+    runs-on: ubuntu-latest
+    container:
+      image: tsoares91/open_weather:latest
+    steps:
+    - uses: actions/checkout@v2   
+    - name: Run testscript
+      run: python3 ./python/main_opp.py

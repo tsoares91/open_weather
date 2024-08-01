@@ -1,0 +1,6 @@
+weather_data.csv
+
+# Ignore directories
+.pytest_cache/
+.vs/
+.python/__pycache__/
